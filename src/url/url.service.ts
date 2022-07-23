@@ -21,18 +21,19 @@ export class UrlService {
   async shortenUrl(url: ShortenURLDto) {
     const { longUrl } = url;
 
+    //checks if longurl is a valid URL
     if (!isURL(longUrl)) {
       throw new BadRequestException('String Must be a Valid URL');
     }
 
-    const urlCode = nanoid();
+    const urlCode = nanoid(10);
     const baseURL = 'http://localhost:3000';
 
     try {
       //check if the URL has already been shortened
       let url = await this.repo.findOneBy({ longUrl });
       //return it if it exists
-      if (url) return url;
+      if (url) return url.shortUrl;
       const shortUrl = `${baseURL}/${urlCode}`;
 
       //if it doesnt exist shorten it
@@ -43,7 +44,7 @@ export class UrlService {
       });
 
       this.repo.save(url);
-      return shortUrl;
+      return url.shortUrl;
     } catch (error) {
       console.log(error);
       throw new UnprocessableEntityException('Server Error');
